@@ -58,22 +58,39 @@ class CRUDGenerico:
 
 
 
-    def consultar(self, tabela: str, id: int) -> list[tuple[any]]: #READ
-        if self.conectar == True: # se estiver conectado
+    def consultar(self, tabela: str, id) -> list[tuple[any]]: #READ
+        if self.conectar() == True: # se estiver conectado
             dados = self.cursor.execute(
-                f"SELECT * FROM {tabela} WHERE id = {id}"
+                f"SELECT * FROM {tabela} WHERE id={id}"
             ).fetchall()
             return dados
 
 
 
 
-    def alterar(self) -> None: #UPDATE
-        pass
+    def alterar(self, tabela: str, id: int, coluna: str, novo_valor: str) -> list[tuple[any]]: #UPDATE
+        backup = self.consultar(tabela=tabela, id=id)
+        if self.conectar() == True:
+            self.cursor.execute(
+                f"UPDATE {tabela} SET {coluna} VALUES {novo_valor} WHERE id={id}"
+            )
+            self.conexao.commit()
+            registro_atualizado = self.consultar(tabela=tabela, id=id)
+            return backup, registro_atualizado
 
 
-    def apagar(self) -> None: #DELETE
-        pass
+    def apagar(self, tabela: str, id: int) -> list[tuple[any]]: #DELETE
+        backup = self.consultar(tabela=tabela, id=id)
+        if self.conectar() == True:
+            self.cursor.execute(
+                f"DELETE FROM {tabela} WHERE id = {id}"
+            )
+            self.conexao.commit()
+            return backup
+
+            
+            
+
 
     
     
@@ -82,7 +99,7 @@ class CRUDGenerico:
 # Cláusulas de guarda (dunder objects)
 if __name__ == "__main__": # Se o nome do arquivo é igual a ele mesmo
     banco = CRUDGenerico(
-        banco_dados='teste.db',
+        banco_dados='elogie_aqui.db',
         usuario='admin',
         senha='admin'
     )
